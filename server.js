@@ -12,11 +12,8 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? "http://localhost:5173" 
+      ? "http://localhost:5173"
       : "https://rajopticals.vercel.app",
-    // process.env.NODE_ENV === "production"
-    //   ? "https://rajopticals.vercel.app" 
-    //   : "http://localhost:5173",
   methods: ["GET", "POST"],
   credentials: true,
 };
@@ -24,29 +21,25 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// ✅ Environment variable logging
+// ✅ Log environment variables for debugging
 console.log("🔧 Environment Variables Check:");
 console.log("PORT:", process.env.PORT);
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log(
-  "EMAIL_PASS:",
-  process.env.EMAIL_PASS ? "✓ exists" : "✗ missing"
-);
-console.log(
-  "FOUNDER_EMAIL:",
-  process.env.FOUNDER_EMAIL || "✗ missing"
-);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✓ exists" : "✗ missing");
+console.log("FOUNDER_EMAIL:", process.env.FOUNDER_EMAIL || "✗ missing");
 
-// ✅ Configure Nodemailer transporter
+// ✅ Configure Nodemailer transporter (simplified like Code 2)
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,         // use 465 for secure SSL
-  secure: true,      // true for port 465
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // TLS
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 20000 // 20 seconds timeout
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 // ✅ Verify transporter
@@ -120,7 +113,7 @@ app.post("/api/contact", async (req, res) => {
     console.log("Founder email:", process.env.FOUNDER_EMAIL);
     console.log("Patient email:", email);
 
-    // Founder email (same HTML as before)
+    // Founder email (same HTML body as before)
     const founderMailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.FOUNDER_EMAIL,
@@ -131,74 +124,45 @@ app.post("/api/contact", async (req, res) => {
             <h2 style="margin: 0; text-align: center;">NEW PATIENT INQUIRY RECEIVED</h2>
             <p style="margin: 5px 0 0 0; text-align: center; opacity: 0.9;">Auto-generated from Raj Opticals Website</p>
           </div>
-
           <div style="padding: 25px; background: #f8fafc;">
             <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
-              <h3 style="color: #1e40af; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">📋 Patient Contact Information</h3>
+              <h3 style="color: #1e40af; margin-top: 0;">📋 Patient Contact Information</h3>
               <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: bold; width: 140px; background: #f8fafc;">Patient Name:</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 16px; font-weight: bold; color: #1e40af;">${name}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: bold; background: #f8fafc;">Email Address:</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-                    <a href="mailto:${email}" style="color: #2563eb; text-decoration: none; font-weight: bold;">${email}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9; font-weight: bold; background: #f8fafc;">Phone Number:</td>
-                  <td style="padding: 12px; border-bottom: 1px solid #f1f5f9;">
-                    ${
-                      phone
-                        ? `<a href="tel:${phone}" style="color: #059669; text-decoration: none; font-weight: bold;">${phone}</a>`
-                        : '<span style="color: #6b7280;">Not provided</span>'
-                    }
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding: 12px; font-weight: bold; background: #f8fafc;">Received At:</td>
-                  <td style="padding: 12px; color: #7c3aed; font-weight: bold;">${timestamp} (IST)</td>
-                </tr>
+                <tr><td><b>Patient Name:</b></td><td>${name}</td></tr>
+                <tr><td><b>Email Address:</b></td><td>${email}</td></tr>
+                <tr><td><b>Phone Number:</b></td><td>${phone || "Not provided"}</td></tr>
+                <tr><td><b>Received At:</b></td><td>${timestamp} (IST)</td></tr>
               </table>
             </div>
-
-            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
-              <h3 style="color: #1e40af; margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">💬 Patient's Message</h3>
-              <div style="background: #f0f9ff; padding: 20px; border-radius: 6px; border-left: 4px solid #2563eb;">
-                <p style="margin: 0; line-height: 1.6; color: #374151; font-size: 15px;">
-                  ${message.replace(/\n/g, "<br>")}
-                </p>
-              </div>
+            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <h3 style="color: #1e40af;">💬 Patient's Message</h3>
+              <p>${message.replace(/\n/g, "<br>")}</p>
             </div>
           </div>
         </div>
       `,
     };
 
-    // Patient confirmation email
+    // Patient confirmation email (same HTML body as before)
     const patientMailOptions = {
       from: { name: "Raj Opticals", address: process.env.EMAIL_USER },
       to: email,
       subject: "Thank You for Contacting Raj Opticals",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="text-align: center; padding: 25px 0; background: linear-gradient(135deg, #2563eb, #1e40af); color: white; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">Raj Opticals</h1>
-            <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 16px;">Eye Care & Optical Services</p>
+          <div style="text-align: center; padding: 25px 0; background: linear-gradient(135deg, #2563eb, #1e40af); color: white;">
+            <h1>Raj Opticals</h1>
+            <p>Eye Care & Optical Services</p>
           </div>
-
           <div style="padding: 30px;">
-            <h2 style="color: #2563eb; margin-top: 0; text-align: center;">Thank You for Your Inquiry!</h2>
-            <p style="text-align: center; color: #374151;">
-              We have received your message and will contact you shortly.
-            </p>
+            <h2 style="color: #2563eb; text-align: center;">Thank You for Your Inquiry!</h2>
+            <p style="text-align: center;">We have received your message and will contact you shortly.</p>
           </div>
         </div>
       `,
     };
 
-    console.log("🔄 Attempting to send emails...");
+    console.log("🔄 Sending emails...");
 
     await Promise.all([
       transporter.sendMail(founderMailOptions),

@@ -12,8 +12,11 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? "https://rajopticals.vercel.app" 
-      : "http://localhost:5173",
+      ? "http://localhost:5173" 
+      : "https://rajopticals.vercel.app",
+    // process.env.NODE_ENV === "production"
+    //   ? "https://rajopticals.vercel.app" 
+    //   : "http://localhost:5173",
   methods: ["GET", "POST"],
   credentials: true,
 };

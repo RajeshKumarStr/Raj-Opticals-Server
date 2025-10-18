@@ -20,11 +20,15 @@ console.log('EMAIL_PASS length:', process.env.EMAIL_PASS ? process.env.EMAIL_PAS
 
 // Create transporter for nodemailer
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+   host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  tls: { rejectUnauthorized: false },
+  connectionTimeout: 20000,
 });
 
 // Test email configuration with better logging

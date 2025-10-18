@@ -39,11 +39,14 @@ console.log(
 
 // ✅ Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 465,         // use 465 for secure SSL
+  secure: true,      // true for port 465
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS
   },
+  connectionTimeout: 20000 // 20 seconds timeout
 });
 
 // ✅ Verify transporter

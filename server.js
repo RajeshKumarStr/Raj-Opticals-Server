@@ -12,8 +12,8 @@ const PORT = process.env.PORT || 5000;
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? "http://localhost:5173"
-      : "https://rajopticals.vercel.app",
+    ? "http://localhost:5173"
+    : "https://rajopticals.vercel.app",
   methods: ["GET", "POST"],
   credentials: true,
 };
@@ -28,17 +28,14 @@ console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✓ exists" : "✗ missing");
 console.log("FOUNDER_EMAIL:", process.env.FOUNDER_EMAIL || "✗ missing");
 
-// ✅ Configure Nodemailer transporter (simplified like Code 2)
+// ✅ Configure Nodemailer transporter - USE PORT 465 WITH SSL
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // TLS
+  port: 465, 
+  secure: true, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
   },
 });
 
@@ -113,7 +110,7 @@ app.post("/api/contact", async (req, res) => {
     console.log("Founder email:", process.env.FOUNDER_EMAIL);
     console.log("Patient email:", email);
 
-    // Founder email (same HTML body as before)
+    // Founder email
     const founderMailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.FOUNDER_EMAIL,
@@ -143,7 +140,7 @@ app.post("/api/contact", async (req, res) => {
       `,
     };
 
-    // Patient confirmation email (same HTML body as before)
+    // Patient confirmation email
     const patientMailOptions = {
       from: { name: "Raj Opticals", address: process.env.EMAIL_USER },
       to: email,
